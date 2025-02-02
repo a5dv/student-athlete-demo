@@ -19,7 +19,7 @@ export default async function SignIn() {
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle className="flex justify-center">Student Athelete Co Demo App</CardTitle>
+          <CardTitle className="flex justify-center">Student Athlete Co Demo App</CardTitle>
         </CardHeader>
         <CardContent className="flex justify-center">
           <p>Please sign in to continue</p>
