@@ -2,7 +2,7 @@
 import { getProviders } from "next-auth/react"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
-import { authOptions } from "../../api/auth/[...nextauth]/route"
+import { authOptions } from "@/lib/auth"
 import { LoginButton } from "@/components/auth/LoginButton"
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
 

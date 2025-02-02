@@ -1,34 +1,46 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { prisma } from "@/lib/prisma"
-import { authOptions } from "../../auth/[...nextauth]/route"
+import { authOptions } from "@/lib/auth"
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+type Context = {
+  params: Promise<{id: string}>
+}
+
+export async function PUT(
+  request: Request,
+  context: Context
+) {
   const session = await getServerSession(authOptions)
   if (!session) {
     return new NextResponse("Unauthorized", { status: 401 })
   }
 
-  const body = await req.json()
+  const { id } = await context.params;
+  const body = await request.json()
   const updatedData = await prisma.trainingData.update({
-    where: { id: params.id },
+    where: { id },
     data: body,
   })
 
   return NextResponse.json(updatedData)
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: Request,
+  context: Context
+) {
   const session = await getServerSession(authOptions)
   if (!session) {
     return new NextResponse("Unauthorized", { status: 401 })
   }
 
+  const { id } = await context.params;
+
   await prisma.trainingData.update({
-    where: { id: params.id },
+    where: { id },
     data: { deletedAt: new Date() },
   })
 
   return new NextResponse(null, { status: 204 })
 }
-

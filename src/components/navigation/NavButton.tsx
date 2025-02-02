@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { LucideIcon } from 'lucide-react'
 import { cn } from "@/lib/utils"
 
 export function NavButton({ 
@@ -11,7 +12,7 @@ export function NavButton({
   isActive 
 }: { 
   href: string
-  icon: any
+  icon: LucideIcon
   label: string
   isActive: boolean 
 }) {
