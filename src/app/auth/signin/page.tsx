@@ -1,8 +1,10 @@
-import { getProviders, signIn } from "next-auth/react"
+// app/auth/signin/page.tsx
+import { getProviders } from "next-auth/react"
 import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 import { authOptions } from "../../api/auth/[...nextauth]/route"
-import { Button } from "@/components/ui/button"
+import { LoginButton } from "@/components/auth/LoginButton"
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
 
 export default async function SignIn() {
   const session = await getServerSession(authOptions)
@@ -14,15 +16,21 @@ export default async function SignIn() {
   const providers = await getProviders()
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      {providers &&
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <Card className="w-[350px]">
+        <CardHeader>
+          <CardTitle className="flex justify-center">Student Athelete Co Demo App</CardTitle>
+        </CardHeader>
+        <CardContent className="flex justify-center">
+          <p>Please sign in to continue</p>
+        </CardContent>
+        <CardFooter className="flex justify-center">
+        {providers &&
         Object.values(providers).map((provider) => (
-          <div key={provider.name}>
-            <Button onClick={() => signIn(provider.id, { callbackUrl: "/dashboard" })}>
-              Sign in with {provider.name}
-            </Button>
-          </div>
+          <LoginButton key={provider.name} provider={provider} />
         ))}
-    </div>
+        </CardFooter>
+      </Card>
+    </main>
   )
 }

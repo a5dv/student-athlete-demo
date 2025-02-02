@@ -1,8 +1,27 @@
-"use client"
+'use client'
 
 import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
+import { GoogleIcon } from "@/components/icons/GoogleIcon"
 
-export function LoginButton() {
-  return <Button onClick={() => signIn("google")}>Sign in with Google</Button>
+type Provider = {
+  id: string
+  name: string
+}
+
+type LoginButtonProps = {
+  provider: Provider
+}
+
+export function LoginButton({ provider }: LoginButtonProps) {
+  return (
+    <div>
+      <Button 
+        onClick={() => signIn(provider.id, { callbackUrl: "/dashboard" })}
+      >
+        <GoogleIcon />
+        Sign in with {provider.name}
+      </Button>
+    </div>
+  )
 }
