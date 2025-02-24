@@ -17,7 +17,7 @@ export function LoginButton({ provider }: LoginButtonProps) {
   return (
     <div>
       <Button 
-        onClick={() => signIn(provider.id, { callbackUrl: "/dashboard" })}
+        onClick={() => signIn(provider.id, { callbackUrl: "/dashboard" })} className="w-full"
       >
         <GoogleIcon />
         Sign in with {provider.name}

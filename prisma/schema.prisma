@@ -8,32 +8,94 @@ generator client {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  lastLogin     DateTime?
-  Account       Account[]
-  Session       Session[]
-  trainingData TrainingData[]
+  id                 String     @id @default(cuid())
+  name               String?
+  email              String?    @unique
+  emailVerified      DateTime?
+  image              String?
+  role               Role       @default(CLIENT)
+  status             UserStatus @default(PENDING)
+  lastLogin          DateTime?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  bookingsAsClient   Booking[]  @relation("ClientBookings")
+  bookingsAsProvider Booking[]  @relation("ProviderBookings")
+  Account            Account[]
+  Session            Session[]
 }
 
+model Booking {
+  id               String         @id @default(cuid())
+  status           BookingStatus
+  clientId         String
+  providerId       String
+  category         Category
+  dateTime         DateTime
+  location         String
+  price            Float
+  paymentMethod    PaymentMethod?
+  paymentStatus    PaymentStatus
+  paymentReference String?
+  paymentDate      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  isRescheduled    Boolean        @default(false)
+  client           User           @relation("ClientBookings", fields: [clientId], references: [id])
+  provider         User           @relation("ProviderBookings", fields: [providerId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+  PROVIDER
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum Category {
+  BASKETBALL
+  BASEBALL
+  FOOTBALL
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  PAYPAL
+  BANK_TRANSFER
+  ADMIN_MANUAL
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+// Models below for Next-Auth
+
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -54,18 +116,4 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
-}
-
-model TrainingData {
-  id                String   @id @default(cuid())
-  userId            String
-  date              DateTime
-  activity          String
-  durationInMinutes Float
-  rating            Int
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  deletedAt         DateTime?
-
-  user              User     @relation(fields: [userId], references: [id])
 }

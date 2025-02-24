@@ -15,7 +15,17 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pnpm install"
+	"postCreateCommand": "pnpm install",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"esbenp.prettier-vscode",
+				"dbaeumer.vscode-eslint",
+				"eamodio.gitlens",
+				"cweijan.vscode-postgresql-client2"
+			]
+		}
+	}
 
 	// Configure tool-specific properties.
 	// "customizations": {},

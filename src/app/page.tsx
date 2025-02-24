@@ -4,18 +4,25 @@ import { redirect } from "next/navigation"
 import { authOptions } from "@/lib/auth"
 
 export default async function App() {
-  try {
-    const session = await getServerSession(authOptions)
+  // try {
+  //   const session = await getServerSession(authOptions)
     
-    if (session) {
-      redirect("/dashboard")
-    }
+  //   if (session) {
+  //     redirect("/dashboard")
+  //   }
 
-    redirect("/auth/signin")
-  } catch (error) {
-    // Log the error to your error monitoring service
-    console.error("Authentication error:", error)
-    // Redirect to signin page as a fallback
+  //   redirect("/auth/signin")
+  // } catch (error) {
+  //   // Log the error to your error monitoring service
+  //   console.error("Authentication error:", error)
+  //   // Redirect to signin page as a fallback
+  //   redirect("/auth/signin")
+  // }
+  const session = await getServerSession(authOptions)
+
+  if (!session) {
     redirect("/auth/signin")
   }
+
+  redirect("/dashboard")
 }

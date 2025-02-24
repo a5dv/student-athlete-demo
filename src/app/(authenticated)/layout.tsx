@@ -3,13 +3,6 @@ import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 import { authOptions } from "@/lib/auth"
 import { Sidebar } from "@/components/navigation/Sidebar"
-import { prisma } from "@/lib/prisma"
-
-async function getUserId(email: string | null | undefined) {
-  if (!email) return null
-  const user = await prisma.user.findUnique({ where: { email } })
-  return user?.id
-}
 
 export default async function AuthenticatedLayout({
   children,
@@ -22,15 +15,9 @@ export default async function AuthenticatedLayout({
     redirect("/auth/signin")
   }
 
-  const userId = await getUserId(session.user?.email)
-
-  if (!userId) {
-    redirect("/auth/signin")
-  }
-
   return (
     <div className="flex h-screen">
-      <Sidebar />
+      <Sidebar role={session.user.role} />
       <main className="flex-1 overflow-auto p-8">{children}</main>
     </div>
   )

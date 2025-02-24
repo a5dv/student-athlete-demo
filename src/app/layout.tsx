@@ -1,8 +1,9 @@
 import "./globals.css"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/providers/theme-provider"
-import { ModeToggle } from "@/components/ModeToggle"
+import { ThemeProvider } from "@/providers/ThemeProvider"
+import { SessionProvider } from "@/providers/SessionProvider"
+import { ThemeToggle } from "@/components/ThemeToggle"
 import type React from "react" // Import React
 
 const inter = Inter({ subsets: ["latin"] })
@@ -20,14 +21,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <div className="min-h-screen flex flex-col">
-            <div className="absolute top-0 right-0 p-4">
-              <ModeToggle />
+        <SessionProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <div className="min-h-screen flex flex-col">
+              <div className="absolute top-0 right-0 p-4">
+                <ThemeToggle />
+              </div>
+              {children}
             </div>
-            {children}
-          </div>
-        </ThemeProvider>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   )
