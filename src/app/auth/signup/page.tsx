@@ -9,7 +9,7 @@ import { SignUpButton } from "@/components/auth/SignUpButton"
 export default async function SignUp({
   searchParams,
 }: {
-  searchParams: { error: string }
+  searchParams: Promise<{error: string}>
 }
   
 ) {

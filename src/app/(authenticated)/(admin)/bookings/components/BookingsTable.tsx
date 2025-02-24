@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// TODO: remove unused variables
 "use client"
 
 import { useState } from "react"
@@ -17,12 +19,12 @@ interface BookingsTableProps {
 }
 
 export function BookingsTable({ initialData }: BookingsTableProps) {
-  const [data, setData] = useState(initialData)
+  const [data, _setData] = useState(initialData)
   const [search, setSearch] = useState("")
-  const [filters, setFilters] = useState({})
-  const [dateFilters, setDateFilters] = useState({})
+  const [_filters, _setFilters] = useState({})
+  const [_dateFilters, _setDateFilters] = useState({})
   const [pageSize, setPageSize] = useState(15)
-  const router = useRouter()
+  // const router = useRouter()
 
   // Implement search, filter, and pagination logic here
 
