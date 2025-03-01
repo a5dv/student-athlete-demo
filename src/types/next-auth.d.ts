@@ -8,7 +8,16 @@ declare module 'next-auth' {
   interface Session {
     user: User
   }
-  // interface AdapterUser extends PrismaUser {
-  //   role: string
-  // }
+  interface AdapterUser extends PrismaUser {
+    role: string
+  }
+
+  interface Profile {
+    sub?: string
+    name?: string
+    email?: string
+    image?: string
+    role?: string
+    picture?: string
+  }
 }
