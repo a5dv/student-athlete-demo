@@ -4,7 +4,8 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/providers/ThemeProvider"
 import { SessionProvider } from "@/providers/SessionProvider"
 import { ThemeToggle } from "@/components/ThemeToggle"
-import type React from "react" // Import React
+import { Toaster } from '@/components/ui/sonner'
+import type React from "react"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
   description: "A production-grade Next.js web app",
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
@@ -25,6 +26,7 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <div className="min-h-screen flex flex-col">
               <div className="absolute top-0 right-0 p-4">
+                <Toaster richColors/>
                 <ThemeToggle />
               </div>
               {children}

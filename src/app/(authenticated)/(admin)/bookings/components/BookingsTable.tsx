@@ -1,86 +1,229 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// TODO: remove unused variables
 "use client"
 
-import { useState } from "react"
-import type { Booking, User } from "@prisma/client"
-import { useRouter } from "next/navigation"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Select } from "@/components/ui/select"
+import { useEffect, useState } from "react"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
+import { BookingStatus, PaymentStatus, PaymentMethod, Category } from "@prisma/client"
+import { toast } from "sonner"
 
-type BookingWithUsers = Booking & {
-  client: User
-  provider: User
-}
+import { SearchFilters } from "./booking-table/SearchFilters"
+import { TableComponent } from "./booking-table/TableComponent"
+import { PaginationControls } from "./booking-table/PaginationControls"
+import { getBookings } from "@/services/bookings/queries"
+import { updateBookingStatus, updateBookingPaymentStatus } from "@/services/bookings/mutations"
+import { BookingWithRelations } from "@/types/bookings"
 
 interface BookingsTableProps {
-  initialData: BookingWithUsers[]
+  initialData: BookingWithRelations[]; // Bookings with included relations
+  totalPages: number
+  currentPage: number
+  perPage: number
 }
 
-export function BookingsTable({ initialData }: BookingsTableProps) {
-  const [data, _setData] = useState(initialData)
-  const [search, setSearch] = useState("")
-  const [_filters, _setFilters] = useState({})
-  const [_dateFilters, _setDateFilters] = useState({})
-  const [pageSize, setPageSize] = useState(15)
-  // const router = useRouter()
+export default function BookingsTable({
+  initialData,
+  totalPages,
+  currentPage,
+  perPage,
+}: BookingsTableProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  
+  // Initialize state from URL parameters
+  const [bookings, setBookings] = useState<BookingWithRelations[]>(initialData)
+  const [search, setSearch] = useState(searchParams.get("search") || "")
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "")
+  const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "")
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState(searchParams.get("paymentMethod") || "")
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState(searchParams.get("paymentStatus") || "")
+  const [loading, setLoading] = useState(false)
 
-  // Implement search, filter, and pagination logic here
+  // Update local state when search params change
+  useEffect(() => {
+    setSearch(searchParams.get("search") || "")
+    setStatusFilter(searchParams.get("status") || "")
+    setCategoryFilter(searchParams.get("category") || "")
+    setPaymentMethodFilter(searchParams.get("paymentMethod") || "")
+    setPaymentStatusFilter(searchParams.get("paymentStatus") || "")
+  }, [searchParams])
+
+  // Fetch data when search params change
+  useEffect(() => {
+    const fetchFilteredData = async () => {
+      setLoading(true)
+      try {
+        // Convert URL parameters to service function parameters
+        const page = parseInt(searchParams.get("page") || "1", 10)
+        const itemsPerPage = parseInt(searchParams.get("perPage") || "15", 10)
+        
+        // Build filters from URL parameters
+        const filters = {
+          search: searchParams.get("search") || undefined,
+          status: searchParams.get("status") as BookingStatus || undefined,
+          category: searchParams.get("category") as Category|| undefined,
+          paymentMethod: searchParams.get("paymentMethod") as PaymentMethod|| undefined,
+          paymentStatus: searchParams.get("paymentStatus") as PaymentStatus || undefined,
+        }
+        
+        // Use the service function instead of fetch
+        const result = await getBookings(
+          filters, 
+          { page, perPage: itemsPerPage }
+        )
+        
+        setBookings(result.data)
+      } catch (error) {
+        console.error("Error fetching filtered bookings:", error)
+        toast.error("Failed to fetch filtered bookings")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    // Only fetch if we have search params (skip on initial load since we have initialData)
+    if (searchParams.toString()) {
+      fetchFilteredData()
+    }
+  }, [searchParams])
+
+  // URL query management
+  const createQueryString = (params: Record<string, string | null>) => {
+    const newSearchParams = new URLSearchParams(searchParams.toString())
+    
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === null || value === "") {
+        newSearchParams.delete(key)
+      } else {
+        newSearchParams.set(key, value)
+      }
+    })
+    
+    return newSearchParams.toString()
+  }
+
+  // Apply filters
+  const applyFilters = () => {
+    router.push(
+      `${pathname}?${createQueryString({
+        search: search || "",
+        status: statusFilter || "",
+        category: categoryFilter || "",
+        paymentMethod: paymentMethodFilter || "",
+        paymentStatus: paymentStatusFilter || "",
+        page: "1", // Reset to first page when filters change
+        perPage: perPage.toString(),
+      })}`
+    )
+  }
+
+  // Handle pagination change
+  const handlePageChange = (page: number) => {
+    router.push(
+      `${pathname}?${createQueryString({
+        page: page.toString(),
+        perPage: perPage.toString(),
+      })}`
+    )
+  }
+
+  // Handle per page change
+  const handlePerPageChange = (value: string) => {
+    router.push(
+      `${pathname}?${createQueryString({
+        page: "1", // Reset to first page
+        perPage: value,
+      })}`
+    )
+  }
+
+  // Handle status update
+  const handleBookingStatusUpdate = async (bookingId: string, status: BookingStatus) => {
+    try {
+      // Use the service function instead of fetch
+      const updatedBooking = await updateBookingStatus(bookingId, status)
+
+      // Update the local state
+      setBookings(
+        bookings.map((booking) =>
+          booking.id === updatedBooking.id ? { ...booking, status: updatedBooking.status } : booking
+        )
+      )
+
+      toast.success(`Booking status updated to ${status}`)
+    } catch (error) {
+      toast.error("Failed to update booking status")
+      console.error(error)
+    }
+  }
+
+  // Handle payment status update
+  const handlePaymentStatusUpdate = async (bookingId: string, paymentStatus: PaymentStatus) => {
+    try {
+      // Use the service function instead of fetch
+      const updatedBooking = await updateBookingPaymentStatus(bookingId, paymentStatus)
+
+      // Update the local state
+      setBookings(
+        bookings.map((booking) =>
+          booking.id === updatedBooking.id ? { ...booking, paymentStatus: updatedBooking.paymentStatus } : booking
+        )
+      )
+
+      toast.success(`Payment status updated to ${paymentStatus}`)
+    } catch (error) {
+      toast.error("Failed to update payment status")
+      console.error(error)
+    }
+  }
+
+  const clearFilters = () => {
+    setSearch("");
+    setStatusFilter("");
+    setCategoryFilter("");
+    setPaymentMethodFilter("");
+    setPaymentStatusFilter("");
+    router.push(pathname);
+  };
 
   return (
-    <div>
-      <div className="flex space-x-2 mb-4">
-        <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} />
-        {/* Add filter dropdowns here */}
-        {/* Add date pickers here */}
-        <Select value={pageSize.toString()} onValueChange={(value: string) => setPageSize(Number(value))}>
-          <option value="15">15 per page</option>
-          <option value="50">50 per page</option>
-        </Select>
-      </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Booking ID</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Client</TableHead>
-            <TableHead>Provider</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Date & Time</TableHead>
-            <TableHead>Location</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>Payment Method</TableHead>
-            <TableHead>Payment Status</TableHead>
-            <TableHead>Payment Reference</TableHead>
-            <TableHead>Payment Date</TableHead>
-            <TableHead>Creation Date</TableHead>
-            <TableHead>Rescheduled</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((booking) => (
-            <TableRow key={booking.id}>
-              <TableCell>{booking.id}</TableCell>
-              <TableCell>{booking.status}</TableCell>
-              <TableCell>{booking.client.name}</TableCell>
-              <TableCell>{booking.provider.name}</TableCell>
-              <TableCell>{booking.category}</TableCell>
-              <TableCell>{booking.dateTime.toLocaleString()}</TableCell>
-              <TableCell>{booking.location}</TableCell>
-              <TableCell>{booking.price}</TableCell>
-              <TableCell>{booking.paymentMethod}</TableCell>
-              <TableCell>{booking.paymentStatus}</TableCell>
-              <TableCell>{booking.paymentReference}</TableCell>
-              <TableCell>{booking.paymentDate?.toLocaleDateString()}</TableCell>
-              <TableCell>{booking.createdAt.toLocaleDateString()}</TableCell>
-              <TableCell>{booking.isRescheduled ? "Yes" : "No"}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {/* Add pagination controls here */}
+    <div className="space-y-4">
+      {/* Search and Filters Component */}
+      <SearchFilters
+        search={search}
+        setSearch={setSearch}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+        paymentMethodFilter={paymentMethodFilter}
+        setPaymentMethodFilter={setPaymentMethodFilter}
+        paymentStatusFilter={paymentStatusFilter}
+        setPaymentStatusFilter={setPaymentStatusFilter}
+        applyFilters={applyFilters}
+        clearFilters={clearFilters}
+      />
+
+      {/* Table Component */}
+      {loading ? (
+        <div className="flex justify-center p-4">Loading bookings...</div>
+      ) : (
+        <TableComponent
+          bookings={bookings}
+          updateBookingStatus={handleBookingStatusUpdate}
+          updatePaymentStatus={handlePaymentStatusUpdate}
+        />
+      )}
+
+      {/* Pagination Controls */}
+      <PaginationControls
+        totalItems={totalPages * perPage}
+        currentPage={currentPage}
+        perPage={perPage}
+        totalPages={totalPages}
+        itemCount={bookings.length}
+        handlePageChange={handlePageChange}
+        handlePerPageChange={handlePerPageChange}
+      />
     </div>
   )
 }
-

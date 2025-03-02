@@ -1,11 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export default async function AdminDashboard({ ...props }) {
+export default async function ClientDashboard({ ...props }) {
   const { session } = props;
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold">Dashboard</h1>
       <div className="flex items-center space-x-4">
         <Avatar>
           <AvatarImage src={session?.user?.image || undefined} />

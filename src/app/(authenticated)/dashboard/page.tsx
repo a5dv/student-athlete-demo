@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import AdminDashboard from "./components/AdminDashboard";
+import ClientDashboard from "./components/ClientDashboard";
 
 
 export default async function Dashboard() {
@@ -11,6 +12,6 @@ export default async function Dashboard() {
     case "ADMIN":
       return <AdminDashboard session={session} />
     default:
-      return <div>Invalid role</div>
+      return <ClientDashboard session={session} />
   }
 }

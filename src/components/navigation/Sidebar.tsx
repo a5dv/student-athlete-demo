@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
-import { LayoutDashboard, Calendar, CreditCard, LogOut, ChevronLeft, ChevronRight } from "lucide-react"
+import { LayoutDashboard, Calendar, CreditCard, LogOut, ChevronLeft, ChevronRight, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -12,6 +12,7 @@ const adminNavItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: Calendar, label: "Bookings", href: "/bookings" },
   { icon: CreditCard, label: "Manual Payment", href: "/manual-payment" },
+  { icon: Users, label: "User Management", href: "/users" }
 ]
 
 const clientNavItems = [
@@ -53,7 +54,7 @@ export function Sidebar({ role }: {role: string}) {
           ))}
         </nav>
       </div>
-      <div className="p-4 border-t">
+      <div className="p-4 border-t ">
         <Button variant="ghost" className="w-full justify-start" onClick={() => signOut()}>
           <LogOut className="h-4 w-4" />
           {!collapsed && <span className="ml-2">Logout</span>}

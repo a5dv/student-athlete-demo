@@ -20,6 +20,8 @@ export default async function App() {
   // }
   const session = await getServerSession(authOptions)
 
+  // console.log("APP PAGE")
+
   if (!session) {
     redirect("/auth/signin")
   }

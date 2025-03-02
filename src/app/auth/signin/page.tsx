@@ -51,7 +51,7 @@ export default async function SignIn() {
         <CardFooter>
           <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <Link href="/auth/signup" className="underline">
+            <Link href="/auth/preregister" className="underline">
               Sign up
             </Link>
           </p>

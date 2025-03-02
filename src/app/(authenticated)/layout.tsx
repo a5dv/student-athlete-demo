@@ -15,6 +15,12 @@ export default async function AuthenticatedLayout({
     redirect("/auth/signin")
   }
 
+  // console.log('SESSION ON AUTH LAYOUT', session.user)
+
+  if (session.user.status !== "APPROVED") {
+    redirect("/auth/register")
+  }
+
   return (
     <div className="flex h-screen">
       <Sidebar role={session.user.role} />
