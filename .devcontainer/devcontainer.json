@@ -22,7 +22,8 @@
 				"esbenp.prettier-vscode",
 				"dbaeumer.vscode-eslint",
 				"eamodio.gitlens",
-				"cweijan.vscode-postgresql-client2"
+				"cweijan.vscode-postgresql-client2",
+				"csstools.postcss"
 			]
 		}
 	}
