@@ -1,5 +1,5 @@
-import { Card } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function LoadingScreen() {
   return (
@@ -9,7 +9,7 @@ export default function LoadingScreen() {
           <Skeleton className="h-8 w-[200px] mx-auto" />
           <Skeleton className="h-4 w-[160px] mx-auto" />
         </div>
-        
+
         <div className="space-y-4">
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
@@ -17,5 +17,5 @@ export default function LoadingScreen() {
         </div>
       </Card>
     </div>
-  )
+  );
 }

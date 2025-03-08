@@ -19,36 +19,19 @@ model User {
   status             UserStatus @default(PENDING)
   lastLogin          DateTime?
 
-  accounts      Account[]
-  sessions      Session[]
-
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   deletedAt          DateTime?
 
   bookingsAsClient   Booking[]  @relation("ClientBookings")
   bookingsAsProvider Booking[]  @relation("ProviderBookings")
-}
 
-model Booking {
-  id               String         @id @default(cuid())
-  status           BookingStatus
-  clientId         String
-  providerId       String
-  category         Category
-  dateTime         DateTime
-  location         String
-  price            Float
-  paymentMethod    PaymentMethod?
-  paymentStatus    PaymentStatus
-  paymentReference String?
-  paymentDate      DateTime?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  deletedAt        DateTime?
-  isRescheduled    Boolean        @default(false)
-  client           User           @relation("ClientBookings", fields: [clientId], references: [id])
-  provider         User           @relation("ProviderBookings", fields: [providerId], references: [id])
+  timeSlotsAsProvider TimeSlot[] @relation("ProviderTimeSlots")
+
+
+  // For Next-Auth
+  accounts      Account[]
+  sessions      Session[]
 }
 
 enum Role {
@@ -63,17 +46,37 @@ enum UserStatus {
   REJECTED
 }
 
+model Booking {
+  id               String         @id @default(cuid())
+  status           BookingStatus
+  timeSlotId       String
+  clientId         String
+  providerId       String
+  categoryId       String
+  locationId       String
+  dateTime         DateTime
+  price            Float
+  paymentMethod    PaymentMethod?
+  paymentStatus    PaymentStatus
+  paymentReference String?
+  paymentDate      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  deletedAt        DateTime?
+  isRescheduled    Boolean        @default(false)
+
+  client           User           @relation("ClientBookings", fields: [clientId], references: [id])
+  provider         User           @relation("ProviderBookings", fields: [providerId], references: [id])
+  category         Category       @relation(fields: [categoryId], references: [id])
+  location         SessionLocation @relation(fields: [locationId], references: [id])
+  timeslot         TimeSlot       @relation(fields: [timeSlotId], references: [id])
+}
+
 enum BookingStatus {
   PENDING
   CONFIRMED
   COMPLETED
   CANCELLED
-}
-
-enum Category {
-  BASKETBALL
-  BASEBALL
-  FOOTBALL
 }
 
 enum PaymentMethod {
@@ -90,7 +93,159 @@ enum PaymentStatus {
   CANCELLED
   FAILED
 }
+model Category {
+  id                   String    @id @default(cuid())
+  name                 String
+  description          String?
+  minDurationInMinutes Int
+  maxDurationInMinutes Int
+  minClients           Int
+  maxClients           Int
+  status               CategoryStatus    @default(ACTIVE)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  deletedAt            DateTime?
+  
+  // Relations
+  pricingRules         PricingRule[]
+  availableLocations   LocationCategory[]
+  timeSlots            TimeSlot[]
+  bookings             Booking[]
+}
 
+enum CategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model SessionLocation {
+  id                 String    @id @default(cuid())
+  zipCode            String
+  address            String
+  city               String
+  state              String
+  country            String
+  status             LocationStatus         @default(ACTIVE)
+  capacity           Int
+  approvalStatus     LocationApprovalStatus  @default(PENDING)
+  approvedAt         DateTime?
+  approvedBy         String?
+  availabilityStart  DateTime?
+  availabilityEnd    DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  deletedAt          DateTime?
+  
+  // Relations
+  pricingRules        PricingRule[]
+  availableCategories LocationCategory[]
+  timeSlots           TimeSlot[]
+  bookings            Booking[]
+
+  @@unique([zipCode, address, city, state, country])
+}
+
+model LocationCategory {
+  locationId String
+  categoryId String
+  
+  location SessionLocation @relation(fields: [locationId], references: [id])
+  category Category        @relation(fields: [categoryId], references: [id])
+  
+  @@id([locationId, categoryId])
+}
+
+enum LocationApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+
+enum LocationStatus {
+  ACTIVE
+  INACTIVE
+}
+
+
+// model CategoryPricing {
+//   id          String   @id @default(cuid())
+//   categoryId  String
+//   locationId  String
+//   basePrice   Float
+//   weekendRate Float?
+//   peakHourRate Float?
+  
+//   category    Category        @relation(fields: [categoryId], references: [id])
+//   location    SessionLocation @relation(fields: [locationId], references: [id])
+  
+//   @@unique([categoryId, locationId])
+// }
+
+model TimeSlot {
+  id           String         @id @default(cuid())
+  providerId   String         // The provider who created this timeslot
+  locationId   String
+  categoryId   String
+  startTime    DateTime
+  endTime      DateTime
+  maxClients   Int            // How many clients can book this slot
+  currentBookings Int         @default(0)
+  status       TimeSlotStatus @default(AVAILABLE)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  
+  // Relations
+  provider     User           @relation("ProviderTimeSlots", fields: [providerId], references: [id])
+  location     SessionLocation @relation(fields: [locationId], references: [id])
+  category     Category       @relation(fields: [categoryId], references: [id])
+  bookings     Booking[]       // One-to-many relationship with bookings
+}
+
+enum TimeSlotStatus {
+  AVAILABLE
+  FULLY_BOOKED
+  CANCELLED
+  COMPLETED
+}
+
+model PricingRule {
+  id             String        @id @default(cuid())
+  name           String
+  description    String?
+  amount         Float         // The price amount
+  priceType      PriceType     @default(BASE)
+  modifier       Float?        // For adjustments (percentage or fixed)
+  isPercentage   Boolean       @default(false)
+  startDate      DateTime?     // Null for base prices (never expires)
+  endDate        DateTime?     // Null for base prices (never expires)
+  appliesTo      PricingTarget
+  categoryId     String?
+  locationId     String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  
+  category       Category?        @relation(fields: [categoryId], references: [id])
+  location       SessionLocation? @relation(fields: [locationId], references: [id])
+}
+
+enum PriceType {
+  BASE
+  ADJUSTMENT
+  DISCOUNT
+  SURGE
+  SEASONAL
+  PROMOTIONAL
+}
+
+enum PricingTarget {
+  CATEGORY
+  LOCATION
+  WORKSHOP
+  ALL
+}
+
+// DO NOT MODIFY MODELS BELOW
 // Models below for Next-Auth
 
 model Account {

@@ -1,12 +1,12 @@
 // src/app/page.tsx
-import { getServerSession } from "next-auth/next"
-import { redirect } from "next/navigation"
-import { authOptions } from "@/lib/auth"
+import { getServerSession } from 'next-auth/next';
+import { redirect } from 'next/navigation';
+import { authOptions } from '@/lib/auth';
 
 export default async function App() {
   // try {
   //   const session = await getServerSession(authOptions)
-    
+
   //   if (session) {
   //     redirect("/dashboard")
   //   }
@@ -18,13 +18,13 @@ export default async function App() {
   //   // Redirect to signin page as a fallback
   //   redirect("/auth/signin")
   // }
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions);
 
   // console.log("APP PAGE")
 
   if (!session) {
-    redirect("/auth/signin")
+    redirect('/auth/signin');
   }
 
-  redirect("/dashboard")
+  redirect('/dashboard');
 }

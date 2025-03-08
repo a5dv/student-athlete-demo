@@ -1,5 +1,5 @@
-import { Role, UserStatus } from "@prisma/client"
-import { PaginationOptions, PaginatedResult } from "./common/pagination"
+import { Role, UserStatus } from '@prisma/client';
+import { PaginationOptions, PaginatedResult } from './common/pagination';
 
 export interface UserFilters {
   search?: string;
@@ -8,4 +8,4 @@ export interface UserFilters {
 }
 
 // Re-export if needed for backward compatibility
-export type { PaginationOptions, PaginatedResult }
+export type { PaginationOptions, PaginatedResult };

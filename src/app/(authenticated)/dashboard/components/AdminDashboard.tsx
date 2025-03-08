@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default async function AdminDashboard({ ...props }) {
   const { session } = props;
@@ -11,8 +11,10 @@ export default async function AdminDashboard({ ...props }) {
           <AvatarImage src={session?.user?.image || undefined} />
           <AvatarFallback>{session?.user?.name?.[0]}</AvatarFallback>
         </Avatar>
-        <h2 className="text-2xl">Welcome, {`${session?.user?.firstName} ${session?.user?.lastName}`}</h2>
+        <h2 className="text-2xl">
+          Welcome, {`${session?.user?.firstName} ${session?.user?.lastName}`}
+        </h2>
       </div>
     </div>
-  )
+  );
 }

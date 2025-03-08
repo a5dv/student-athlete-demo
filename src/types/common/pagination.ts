@@ -10,5 +10,5 @@ export interface PaginatedResult<T> {
     totalPages: number;
     currentPage: number;
     perPage: number;
-  }
+  };
 }

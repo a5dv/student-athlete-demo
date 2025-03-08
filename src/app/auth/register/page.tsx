@@ -1,18 +1,12 @@
-'use client'
+'use client';
 
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -20,17 +14,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { toast } from 'sonner'
-import LoadingScreen from '@/components/LoadingScreen'
-import { registerSchema, RegisterFormValues } from '@/types/auth'
-import { registerUser } from '@/services/auth/mutations'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import LoadingScreen from '@/components/LoadingScreen';
+import { registerSchema, RegisterFormValues } from '@/types/auth';
+import { registerUser } from '@/services/auth/mutations';
 
 export default function RegisterPage() {
-  const { data: session, update, status } = useSession()
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { data: session, update, status } = useSession();
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -39,48 +33,46 @@ export default function RegisterPage() {
       firstName: '',
       lastName: '',
     },
-  })
+  });
 
   useEffect(() => {
     if (session?.user?.email) {
-      form.setValue('email', session.user.email)
+      form.setValue('email', session.user.email);
     }
-  }, [session, form])
+  }, [session, form]);
 
   if (status === 'loading') {
-    return <LoadingScreen />
+    return <LoadingScreen />;
   }
 
   const onSubmit = async (data: RegisterFormValues) => {
-    if (isSubmitting) return
-    
-    setIsSubmitting(true)
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
     try {
-      const result = await registerUser(data)
-      
+      const result = await registerUser(data);
+
       if (result.success) {
-        await update()
-        toast.success('Registration successful')
-        router.push('/dashboard')
+        await update();
+        toast.success('Registration successful');
+        router.push('/dashboard');
       } else {
-        toast.error(result.error || 'Something went wrong')
+        toast.error(result.error || 'Something went wrong');
       }
     } catch (error) {
-      console.error('Registration error:', error)
-      toast.error('Something went wrong. Please try again.')
+      console.error('Registration error:', error);
+      toast.error('Something went wrong. Please try again.');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="container max-w-md mx-auto py-10">
       <Card>
         <CardHeader>
           <CardTitle>What should we call you?</CardTitle>
-          <CardDescription>
-            Please complete your profile to continue
-          </CardDescription>
+          <CardDescription>Please complete your profile to continue</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -92,11 +84,7 @@ export default function RegisterPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        disabled 
-                        className="bg-muted"
-                      />
+                      <Input {...field} disabled className="bg-muted" />
                     </FormControl>
                   </FormItem>
                 )}
@@ -135,5 +123,5 @@ export default function RegisterPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

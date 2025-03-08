@@ -1,18 +1,18 @@
-"use client"
+'use client';
 
-import { useSearchParams } from "next/navigation"
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { useSearchParams } from 'next/navigation';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function ErrorPage() {
-  const searchParams = useSearchParams()
-  const error = searchParams.get("error")
+  const searchParams = useSearchParams();
+  const error = searchParams.get('error');
 
-  let errorMessage = "An error occurred. Please try again."
+  let errorMessage = 'An error occurred. Please try again.';
 
-  if (error === "existing_user_signup") {
-    errorMessage = "You already have an account. Please sign in instead."
+  if (error === 'existing_user_signup') {
+    errorMessage = 'You already have an account. Please sign in instead.';
   }
 
   return (
@@ -31,6 +31,5 @@ export default function ErrorPage() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
-
