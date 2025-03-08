@@ -98,7 +98,7 @@ export async function getStates(country?: string): Promise<string[]> {
       ...(country ? { country } : {}),
     },
     orderBy: {
-      state: 'asc',
+      state: 'asc' as const,
     },
   };
 
